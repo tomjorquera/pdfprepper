@@ -11,8 +11,8 @@ testrequest:
 
 .PHONY: devserve
 devserve:
-	cd server && \
-	uvicorn main:app --reload
+	cd pdfprepper && \
+	uvicorn serve:app --reload
 
 .PHONY: dockerserve
 dockerserve: dockerbuild

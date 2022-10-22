@@ -14,15 +14,13 @@ RUN apt-get update && \
 # Need to adjust ghostscript security policy to enable pdf version conversion
 RUN sed -i '/disable ghostscript format types/,+6d' /etc/ImageMagick-6/policy.xml
 
-ADD requirements.txt /pdfbaf/requirements.txt
-ADD server /pdfbaf/server
+ADD requirements.txt /pdfprepper/requirements.txt
+ADD pdfprepper /pdfprepper/
 
-WORKDIR /pdfbaf
+WORKDIR /pdfprepper
 
 RUN pip install -r requirements.txt
 
-WORKDIR /pdfbaf/server
-
 EXPOSE 80
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "serve:app", "--host", "0.0.0.0", "--port", "80"]
