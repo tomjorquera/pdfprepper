@@ -8,7 +8,7 @@ from fastapi import FastAPI, Form, UploadFile
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import StreamingResponse
 
-from processing import convert_to_images, downgrade_version, impose_pdf
+from pdfprepper import processing
 
 app = FastAPI()
 
@@ -21,13 +21,12 @@ def process_pdf(
     downgrade: bool = Form(False),
 ):
     resultname = f"{os.path.splitext(pdf.filename)[0]}_printready.pdf"
-    result = io.BytesIO(asyncio.run(pdf.read()))
-    if impose:
-        result = impose_pdf(result)
-    if toimg:
-        result = convert_to_images(result)
-    if downgrade:
-        result = downgrade_version(result)
+    result = processing.process_pdf(
+        io.BytesIO(asyncio.run(pdf.read())),
+        impose,
+        toimg,
+        downgrade,
+    )
     return StreamingResponse(
         result,
         media_type="application/pdf",

@@ -6,6 +6,22 @@ from io import BytesIO
 from pdfimpose.schema import saddle
 
 
+def process_pdf(
+    source_pdf: BytesIO,
+    impose: bool = True,
+    toimg: bool = True,
+    downgrade: bool = True,
+) -> BytesIO:
+    result = source_pdf
+    if impose:
+        result = impose_pdf(result)
+    if toimg:
+        result = convert_to_images(result)
+    if downgrade:
+        result = downgrade_version(result)
+    return result
+
+
 def impose_pdf(source_pdf: BytesIO) -> BytesIO:
     "Impose a pdf in a booklet format."
     imposed = BytesIO()
