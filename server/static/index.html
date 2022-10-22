@@ -1,0 +1,23 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>PDF prepper</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+        Préparez votre PDF pour impression.
+
+        <form action="/processpdf" target="_blank" method="post" enctype="multipart/form-data">
+            <input type="file"
+                   name="pdf"
+                   accept="application/pdf">
+
+            <button>Send</button>
+        </form>
+
+
+    </body>
+</html>
