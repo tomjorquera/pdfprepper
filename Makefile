@@ -4,7 +4,10 @@ testrequest:
 		-H 'accept: */*' \
 		-H 'Content-Type: multipart/form-data' \
 		--output 'result.pdf' \
-		-F 'pdf=@template.pdf;type=application/pdf'
+		-F 'pdf=@template.pdf;type=application/pdf' \
+		-F 'impose=ON' \
+		-F 'toimg=ON' \
+		-F 'downgrade=ON' \
 
 .PHONY: devserve
 devserve:

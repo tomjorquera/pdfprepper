@@ -11,10 +11,29 @@
         Préparez votre PDF pour impression.
 
         <form action="/processpdf" target="_blank" method="post" enctype="multipart/form-data">
-            <input type="file"
-                   name="pdf"
-                   accept="application/pdf">
-
+            <div>
+                <input type="file"
+                       name="pdf"
+                       accept="application/pdf">
+            </div>
+            <div>
+                <input type="checkbox"
+                       name="impose"
+                       checked />
+                <label for="impose">Imposition livret</label>
+            </div>
+            <div>
+                <input type="checkbox"
+                       name="toimg"
+                       checked />
+                <label for="toimg">Contenu en images</label>
+            </div>
+            <div>
+                <input type="checkbox"
+                       name="downgrade"
+                       checked />
+                <label for="downgrade">Convertir en PDF v1.2</label>
+            </div>
             <button>Send</button>
         </form>
 
