@@ -35,3 +35,30 @@ def convert_to_images(source_pdf: BytesIO, ppi="300") -> BytesIO:
 
     res.seek(0)
     return res
+
+
+def downgrade_version(source_pdf: BytesIO, target_version="1.2") -> BytesIO:
+    "Downgrade pdf version to target."
+    res = BytesIO()
+    with (tempfile.NamedTemporaryFile() as source_file,):
+        result_file_name = f"{source_file.name}_converted.pdf"
+        source_file.write(source_pdf.read())
+        source_file.flush()
+        subprocess.check_output(
+            [
+                "gs",
+                "-q",
+                "-sDEVICE=pdfwrite",
+                f"-dCompatibilityLevel={target_version}",
+                "-o",
+                result_file_name,
+                source_file.name,
+            ]
+        )
+
+        with open(result_file_name, "rb") as result_file:
+            res.write(result_file.read())
+        os.remove(result_file_name)
+
+    res.seek(0)
+    return res

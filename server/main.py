@@ -8,7 +8,7 @@ from fastapi import FastAPI, UploadFile
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import StreamingResponse
 
-from processing import convert_to_images, impose_pdf
+from processing import convert_to_images, downgrade_version, impose_pdf
 
 app = FastAPI()
 
@@ -19,6 +19,7 @@ def process_pdf(pdf: UploadFile):
         source.write(asyncio.run(pdf.read()))
         result = impose_pdf(source.name)
     result = convert_to_images(result)
+    result = downgrade_version(result)
     return StreamingResponse(result, media_type="application/pdf")
 
 
