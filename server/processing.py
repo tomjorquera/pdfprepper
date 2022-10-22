@@ -6,10 +6,12 @@ from io import BytesIO
 from pdfimpose.schema import saddle
 
 
-def impose_pdf(source_pdf: str) -> BytesIO:
+def impose_pdf(source_pdf: BytesIO) -> BytesIO:
     "Impose a pdf in a booklet format."
     imposed = BytesIO()
-    saddle.impose([source_pdf], imposed, folds="h")
+    with tempfile.NamedTemporaryFile() as source:
+        source.write(source_pdf.read())
+        saddle.impose([source.name], imposed, folds="h")
     imposed.seek(0)
     return imposed
 

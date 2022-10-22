@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 import asyncio
-
-from tempfile import NamedTemporaryFile
+import io
 
 from fastapi import FastAPI, UploadFile
 from fastapi.staticfiles import StaticFiles
@@ -15,9 +14,8 @@ app = FastAPI()
 
 @app.post("/processpdf", response_class=StreamingResponse)
 def process_pdf(pdf: UploadFile):
-    with NamedTemporaryFile() as source:
-        source.write(asyncio.run(pdf.read()))
-        result = impose_pdf(source.name)
+    result = io.BytesIO(asyncio.run(pdf.read()))
+    result = impose_pdf(result)
     result = convert_to_images(result)
     result = downgrade_version(result)
     return StreamingResponse(result, media_type="application/pdf")
