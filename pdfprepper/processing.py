@@ -2,8 +2,9 @@ import os
 import subprocess
 import tempfile
 from io import BytesIO
+from typing import Tuple
 
-from pdfimpose.schema import saddle
+from pdfimpose.schema import copycutfold, saddle
 
 
 def process_pdf(
@@ -16,6 +17,23 @@ def process_pdf(
     result = source_pdf
     if impose:
         result = impose_pdf(result)
+    if toa4:
+        result = change_format(result)
+    if toimg:
+        result = convert_to_images(result)
+    if downgrade:
+        result = downgrade_version(result)
+    return result
+
+
+def batch(
+    source_pdf: BytesIO,
+    toa4: bool = True,
+    toimg: bool = True,
+    downgrade: bool = True,
+) -> BytesIO:
+    result = source_pdf
+    result = multiple_booklets(result)
     if toa4:
         result = change_format(result)
     if toimg:
@@ -106,3 +124,15 @@ def change_format(source_pdf: BytesIO, target_format="a4paper") -> BytesIO:
 
     res.seek(0)
     return res
+
+
+def multiple_booklets(
+    source_pdf: BytesIO, signature: Tuple[int, int] = (1, 2)
+) -> BytesIO:
+    "Prepare pdf for multiple booklets impression."
+    imposed = BytesIO()
+    with tempfile.NamedTemporaryFile() as source:
+        source.write(source_pdf.read())
+        copycutfold.impose([source.name], imposed, signature=signature)
+    imposed.seek(0)
+    return imposed
