@@ -9,12 +9,15 @@ from pdfimpose.schema import saddle
 def process_pdf(
     source_pdf: BytesIO,
     impose: bool = True,
+    toa4: bool = True,
     toimg: bool = True,
     downgrade: bool = True,
 ) -> BytesIO:
     result = source_pdf
     if impose:
         result = impose_pdf(result)
+    if toa4:
+        result = change_format(result)
     if toimg:
         result = convert_to_images(result)
     if downgrade:
@@ -77,6 +80,29 @@ def downgrade_version(source_pdf: BytesIO, target_version="1.2") -> BytesIO:
         with open(result_file_name, "rb") as result_file:
             res.write(result_file.read())
         os.remove(result_file_name)
+
+    res.seek(0)
+    return res
+
+
+def change_format(source_pdf: BytesIO, target_format="a4paper") -> BytesIO:
+    "Change pdf paper format."
+    res = BytesIO()
+    result_file_name = "/tmp/converted.pdf"
+    subprocess.check_output(
+        [
+            "pdfjam",
+            "--paper",
+            target_format,
+            "--outfile",
+            result_file_name,
+        ],
+        input=source_pdf.read(),
+    )
+
+    with open(result_file_name, "rb") as result_file:
+        res.write(result_file.read())
+    os.remove(result_file_name)
 
     res.seek(0)
     return res

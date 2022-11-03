@@ -15,6 +15,7 @@ app = FastAPI()
 def process_pdf(
     pdf: UploadFile,
     impose: bool = Form(False),
+    toa4: bool = Form(False),
     toimg: bool = Form(False),
     downgrade: bool = Form(False),
 ):
@@ -22,6 +23,7 @@ def process_pdf(
     result = processing.process_pdf(
         io.BytesIO(asyncio.run(pdf.read())),
         impose,
+        toa4,
         toimg,
         downgrade,
     )

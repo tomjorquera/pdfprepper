@@ -8,6 +8,7 @@ RUN apt-get update && \
             python3-pip \
             poppler-utils \
             imagemagick \
+            texlive-extra-utils \
     && \
     apt-get clean
 
