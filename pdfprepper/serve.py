@@ -36,4 +36,27 @@ def process_pdf(
     )
 
 
+@app.post("/processbatch", response_class=StreamingResponse)
+def batch(
+    pdf: UploadFile,
+    toa4: bool = Form(False),
+    toimg: bool = Form(False),
+    downgrade: bool = Form(False),
+):
+    resultname = f"{os.path.splitext(pdf.filename)[0]}_batch.pdf"
+    result = processing.batch(
+        io.BytesIO(asyncio.run(pdf.read())),
+        toa4,
+        toimg,
+        downgrade,
+    )
+    return StreamingResponse(
+        result,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'filename="{resultname}"',
+        },
+    )
+
+
 app.mount("/", StaticFiles(directory="static", html=True), name="static")

@@ -1,0 +1,42 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>PDF prepper - batch</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+        Préparez votre PDF pour impression en lots.
+
+        <form action="/processbatch" target="_blank" method="post" enctype="multipart/form-data">
+            <div>
+                <input type="file"
+                       name="pdf"
+                       accept="application/pdf">
+            </div>
+            <div>
+                <input type="checkbox"
+                       name="toa4"
+                       checked />
+                <label for="toa4">Convertir au format A4</label>
+            </div>
+            <div>
+                <input type="checkbox"
+                       name="toimg"
+                       checked />
+                <label for="toimg">Contenu en images</label>
+            </div>
+            <div>
+                <input type="checkbox"
+                       name="downgrade"
+                       checked />
+                <label for="downgrade">Convertir en PDF v1.2</label>
+            </div>
+            <button>Send</button>
+        </form>
+
+
+    </body>
+</html>
