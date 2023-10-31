@@ -18,7 +18,7 @@ def process_pdf(
     if impose:
         result = impose_pdf(result)
     if toa4:
-        result = change_format(result)
+        result = change_format(result, landscape=True)
     if toimg:
         result = convert_to_images(result)
     if downgrade:
@@ -35,7 +35,7 @@ def batch(
     result = source_pdf
     result = multiple_booklets(result)
     if toa4:
-        result = change_format(result)
+        result = change_format(result, landscape=False)
     if toimg:
         result = convert_to_images(result)
     if downgrade:
@@ -103,13 +103,14 @@ def downgrade_version(source_pdf: BytesIO, target_version="1.2") -> BytesIO:
     return res
 
 
-def change_format(source_pdf: BytesIO, target_format="a4paper") -> BytesIO:
+def change_format(source_pdf: BytesIO, target_format="a4paper", landscape=False) -> BytesIO:
     "Change pdf paper format."
     res = BytesIO()
     result_file_name = "/tmp/converted.pdf"
     subprocess.check_output(
         [
             "pdfjam",
+            "--landscape" if landscape else "",
             "--paper",
             target_format,
             "--outfile",
