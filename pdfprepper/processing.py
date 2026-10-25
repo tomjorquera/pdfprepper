@@ -43,6 +43,22 @@ def batch(
     return result
 
 
+def book(
+    source_pdf: BytesIO,
+    toa4: bool = True,
+    signatures: int = 16,
+    toimg: bool = True,
+) -> BytesIO:
+    result = source_pdf
+    if toa4:
+        result = change_format(result, landscape=False)
+    if signatures > 0:
+        result = book_signatures(result, signatures)
+    if toimg:
+        result = convert_to_images(result)
+    return result
+
+
 def impose_pdf(source_pdf: BytesIO) -> BytesIO:
     "Impose a pdf in a booklet format."
     imposed = BytesIO()
@@ -149,3 +165,34 @@ def multiple_booklets(
         copycutfold.impose([source.name], imposed, signature=signature)
     imposed.seek(0)
     return imposed
+
+
+def book_signatures(
+        source_pdf: BytesIO, signature: int = 16,
+) -> BytesIO:
+    """Convert content to book signatures."""
+    res = BytesIO()
+    with (
+            tempfile.NamedTemporaryFile(suffix=".pdf") as infile,
+    ):
+        infile.write(source_pdf.getvalue())
+        infile.flush()
+        cmd = [
+            "pdfbook2",
+            f"--signature={signature}",
+            infile.name
+        ]
+        subprocess.run(
+            cmd,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+        result_file_name = f"{os.path.splitext(infile.name)[0]}-book.pdf"
+        with open(result_file_name, "rb") as result_file:
+            res.write(result_file.read())
+        os.remove(result_file_name)
+
+    res.seek(0)
+    return res
