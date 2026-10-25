@@ -103,25 +103,37 @@ def downgrade_version(source_pdf: BytesIO, target_version="1.2") -> BytesIO:
     return res
 
 
-def change_format(source_pdf: BytesIO, target_format="a4paper", landscape=False) -> BytesIO:
+def change_format(source_pdf: BytesIO, target_format="a4", landscape=False) -> BytesIO:
     "Change pdf paper format."
     res = BytesIO()
-    result_file_name = "/tmp/converted.pdf"
-    subprocess.check_output(
-        [
+    cmd = [
             "pdfjam",
-            "--landscape" if landscape else "",
             "--paper",
             target_format,
-            "--outfile",
-            result_file_name,
-        ],
-        input=source_pdf.read(),
-    )
+    ]
+    if landscape:
+        cmd.append("--landscape")
 
-    with open(result_file_name, "rb") as result_file:
-        res.write(result_file.read())
-    os.remove(result_file_name)
+    with (
+            tempfile.NamedTemporaryFile(suffix=".pdf") as infile,
+            tempfile.NamedTemporaryFile(suffix=".pdf") as outfile,
+    ):
+        infile.write(source_pdf.getvalue())
+        infile.flush()
+
+        cmd.extend([
+            "--outfile", outfile.name,
+            infile.name
+        ])
+        subprocess.run(
+            cmd,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+        outfile.seek(0)
+        res.write(outfile.read())
 
     res.seek(0)
     return res
