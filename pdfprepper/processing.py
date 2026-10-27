@@ -2,7 +2,10 @@ import os
 import subprocess
 import tempfile
 from io import BytesIO
-from typing import Tuple
+from typing import Optional, Tuple
+
+import pymupdf
+import qrcode
 
 from pdfimpose.schema import copycutfold, saddle
 
@@ -45,11 +48,14 @@ def batch(
 
 def book(
     source_pdf: BytesIO,
+    qr_url: Optional[str] = None,
     toa4: bool = True,
     signatures: int = 16,
     toimg: bool = True,
 ) -> BytesIO:
     result = source_pdf
+    if qr_url is not None:
+        result = with_qr_code(result, qr_url)
     if toa4:
         result = change_format(result, landscape=False)
     if signatures > 0:
@@ -194,5 +200,58 @@ def book_signatures(
             res.write(result_file.read())
         os.remove(result_file_name)
 
+    res.seek(0)
+    return res
+
+
+def with_qr_code(
+        source_pdf: BytesIO, qr_content: str
+) -> BytesIO:
+    qr_img = qrcode.make(qr_content)
+    qr_stream = BytesIO()
+    qr_img.save(qr_stream, "PNG")
+    qr_stream.seek(0)
+
+    doc = pymupdf.open(stream=source_pdf, filetype="pdf")
+
+    page = doc[0]
+    margin = 20
+    size = 80
+
+    rect_qr = pymupdf.Rect(
+        page.rect.width - margin - size,
+        page.rect.height - margin - size,
+        page.rect.width - margin,
+        page.rect.height - margin,
+    )
+    page.insert_image(rect_qr, stream=qr_stream)
+
+    rect_text = pymupdf.Rect(
+        rect_qr.x0 - margin / 2,
+        rect_qr.y1,
+        rect_qr.x1 + margin / 2,
+        rect_qr.y1 + margin,
+    )
+
+    def insert_with_font(font: int) -> int:
+        # Will return a negative value if text is too big
+        return page.insert_textbox(
+            rect_text,
+            qr_content,
+            fontsize=font,
+            fontname="helv",
+            align=1,  # centered
+            color=(0, 0, 0),
+        )
+
+    font = 11
+    insert_result = insert_with_font(font)
+    while insert_result < 0:
+        # text too big, reduce font
+        font -= 1
+        insert_result = insert_with_font(font)
+
+    res = BytesIO()
+    res.write(doc.tobytes(deflate=True, garbage=3))
     res.seek(0)
     return res

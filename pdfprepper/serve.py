@@ -1,6 +1,7 @@
 import asyncio
 import io
 import os
+from typing import Optional
 
 from fastapi import FastAPI, Form, UploadFile
 from fastapi.staticfiles import StaticFiles
@@ -61,6 +62,7 @@ def batch(
 @app.post("/processbook", response_class=StreamingResponse)
 def book(
     pdf: UploadFile,
+    qr_url: Optional[str] = Form(None),
     toa4: bool = Form(False),
     signatures: int = Form(),
     toimg: bool = Form(False),
@@ -68,6 +70,7 @@ def book(
     resultname = f"{os.path.splitext(pdf.filename)[0]}_book.pdf"
     result = processing.book(
         io.BytesIO(asyncio.run(pdf.read())),
+        qr_url,
         toa4,
         signatures,
         toimg,
